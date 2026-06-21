@@ -200,17 +200,18 @@
 
   async function loadState(){
     try{
-      const res = await window.storage.get(STORAGE_KEY, false);
-      if(res && res.value) return JSON.parse(res.value);
-    }catch(e){ /* kein gespeicherter Wert vorhanden */ }
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){ /* kein gespeicherter Wert vorhanden oder Storage blockiert */ }
     return null;
   }
 
   async function saveState(state){
     try{
-      await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }catch(e){
       console.error("Speichern fehlgeschlagen", e);
+      statusEl.textContent = "Speichern nicht möglich (privater Modus?)";
     }
   }
 
