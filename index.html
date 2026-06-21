@@ -343,6 +343,15 @@
     state = state || { mondayKey: dateKey(monday), days: {} };
     render(monday);
     setupNFC();
+
+    // Automatisches Erfassen, wenn die Seite über einen NFC-Tag mit ?log=1 geöffnet wurde
+    const params = new URLSearchParams(window.location.search);
+    if(params.get('log') === '1'){
+      await logDrink();
+      // URL-Parameter wieder entfernen, damit ein normales Neuladen nicht erneut zählt
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
   }
 
   logBtn.addEventListener('click', logDrink);
