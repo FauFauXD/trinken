@@ -17,7 +17,7 @@
     margin:0; padding:0;
     background: var(--bg);
     min-height:100vh;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Times New Roman", Times, Georgia, serif;
     color: var(--dark);
     display:flex;
     justify-content:center;
@@ -31,7 +31,7 @@
     align-items:center;
   }
   .bottle{
-    width: 110px;
+    width: 62px;
     height: auto;
     margin-bottom: 28px;
   }
@@ -139,10 +139,8 @@
 <body>
 <div class="page">
 
-  <svg class="bottle" viewBox="0 0 120 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="48" y="6" width="22" height="18" rx="3" fill="#2E5240"/>
-    <path d="M40 26 H78 C82 26 86 30 86 35 V198 C86 206 80 212 72 212 H46 C38 212 32 206 32 198 V35 C32 30 36 26 40 26 Z" fill="#2E5240"/>
-    <path d="M86 40 C92 38 98 40 100 46 C102 52 98 58 92 58" stroke="#2E5240" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <svg class="bottle" viewBox="0 0 62 144" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M61.9522 23.7752L62 25.6825C61.5155 28.8932 59.1373 31.7627 55.7935 32.2848C53.6098 32.626 50.7642 31.8275 48.5634 31.0974C47.591 30.7766 46.9154 29.985 46.1238 29.4391C46.001 30.7323 46.1852 31.889 46.1955 33.09L46.2501 38.8666C46.2637 40.1973 46.4821 41.4699 46.3081 42.787C46.2944 42.8962 46.0488 43.077 46.059 43.1794C46.0692 43.2817 46.2876 43.4626 46.291 43.5752L46.3627 45.81V138.334L46.0112 138.737L44.7863 141.777C43.9708 142.446 42.6231 142.306 41.6507 142.589L40.5998 142.684L38.8119 142.852C38.0305 142.923 37.2867 143.172 36.4814 143.053L35.2429 143.179L31.5545 143.213C31.4589 143.213 31.4043 143.281 31.4112 143.343L15.1085 143.333C14.0132 143.026 12.8531 143.312 11.676 143.189C11.3143 143.152 10.9526 143.002 10.5739 143.056C9.66971 143.186 8.84741 142.923 7.97393 142.848L6.17238 142.691L5.11806 142.62C4.02621 142.37 2.91048 142.36 1.83569 141.903L0.723367 138.931C0.631242 138.682 0.313924 138.58 0.010253 138.436V43.7458C0.354868 43.3977 0.35828 43.077 0.0989658 42.7836C-0.126228 42.108 0.102378 41.4495 0.109202 40.7739L0.167206 34.6084C0.177442 33.4994 0.351456 32.4315 0.279803 31.3157C0.146734 29.2788 0.876908 27.4738 2.21101 25.9691L4.59943 23.277L7.44165 20.114L9.24662 18.0532C9.61512 17.6301 9.9495 17.323 10.5432 17.091C9.77889 16.3369 9.85396 15.5795 10.6046 14.8595C9.94608 14.4398 10.0996 13.928 10.1064 13.3548L10.1883 6.19297C10.202 5.07724 10.3692 4.01268 10.277 2.89695C10.1303 1.13293 11.9387 0.74737 13.962 0.552885L15.2245 0.430052C15.9001 0.365223 16.4767 0.286746 17.1591 0.266274C17.7937 0.245802 18.4079 -0.00668823 19.0767 0.000135826L27.5692 0.0717884C28.4802 0.0786125 29.265 0.354987 30.1897 0.334515C30.6537 0.324279 31.1962 0.419815 31.6875 0.49488L34.3216 0.8975C34.9528 0.993036 35.898 1.36154 36.0072 2.09171C36.1266 2.89695 36.1675 3.72266 36.1744 4.55178L36.2426 11.4543C36.2528 12.4199 36.4064 13.3139 36.3381 14.2965L40.4633 14.8322L42.1079 15.0301L50.3855 15.9991C52.2484 16.2175 53.8964 16.6474 55.6843 17.1934C59.383 18.3261 61.2289 20.039 61.942 23.7786L61.9522 23.7752ZM53.5552 29.3709C55.9846 28.3814 57.3016 25.9316 57.1174 23.3521C56.9741 21.3765 55.9368 19.6568 54.0943 18.8891L49.0991 18.3125L41.1627 17.323C40.9341 17.2957 40.7192 17.4049 40.6441 17.5414C40.5827 17.6506 40.5588 17.9133 40.6885 18.06L42.432 20.0356L44.585 22.3899L46.5537 24.5531L48.8296 27.0746C50.6482 29.0877 51.4978 30.2102 53.5552 29.3743V29.3709Z" fill="#2E5240"/>
   </svg>
 
   <div id="dayLabel" class="label-pill">–</div>
@@ -153,7 +151,6 @@
 
   <div id="weekRow" class="week-row"></div>
 
-  <button id="logBtn" class="action">🍶 Trinken erfasst</button>
   <div id="status" class="status"></div>
 
   <button id="resetBtn" class="reset-link">Heutigen Tag zurücksetzen</button>
@@ -169,7 +166,6 @@
   const dayRowEl   = document.getElementById('dayRow');
   const weekLabelEl= document.getElementById('weekLabel');
   const weekRowEl  = document.getElementById('weekRow');
-  const logBtn     = document.getElementById('logBtn');
   const resetBtn   = document.getElementById('resetBtn');
   const statusEl   = document.getElementById('status');
 
@@ -295,9 +291,6 @@
 
     buildIndicatorCircles(todayCount);
     buildWeekRow(monday, state.days, todayKey);
-
-    logBtn.disabled = todayCount >= 4;
-    logBtn.textContent = todayCount >= 4 ? "✓ Tagesziel erreicht" : "🍶 Trinken erfasst";
   }
 
   async function logDrink(){
@@ -354,7 +347,6 @@
     }
   }
 
-  logBtn.addEventListener('click', logDrink);
   resetBtn.addEventListener('click', resetToday);
 
   (async function start(){
