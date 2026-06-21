@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Trink-Tracker</title>
+<style>
+  :root{
+    --bg: #5BC893;
+    --dark: #2E5240;
+    --blue: #1A2BE0;
+    --white: #ffffff;
+    --black: #16241c;
+  }
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html,body{
+    margin:0; padding:0;
+    background: var(--bg);
+    min-height:100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--dark);
+    display:flex;
+    justify-content:center;
+  }
+  .page{
+    width:100%;
+    max-width:440px;
+    padding: 36px 24px 40px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .bottle{
+    width: 110px;
+    height: auto;
+    margin-bottom: 28px;
+  }
+  .label-pill{
+    background: var(--dark);
+    color: var(--white);
+    font-weight: 700;
+    font-size: 1.15rem;
+    padding: 11px 18px;
+    border-radius: 6px;
+    text-align:center;
+    width:100%;
+    max-width: 400px;
+    letter-spacing: 0.2px;
+  }
+  .day-row{
+    display:flex;
+    justify-content: space-between;
+    gap: 14px;
+    width:100%;
+    max-width: 400px;
+    margin: 26px 0 8px;
+  }
+  .indicator{
+    flex: 1;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    background: var(--white);
+    border: 2.5px solid var(--black);
+    transition: background 0.25s ease;
+  }
+  .indicator.filled{
+    background: var(--blue);
+  }
+  .week-label{
+    margin-top: 38px;
+  }
+  .week-row{
+    display:flex;
+    justify-content: space-between;
+    width:100%;
+    max-width: 400px;
+    margin-top: 24px;
+  }
+  .week-col{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 6px;
+    flex: 1;
+  }
+  .week-col svg{
+    width: 42px;
+    height: 42px;
+  }
+  .week-col span{
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--white);
+  }
+  .week-col.today span{
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .action{
+    margin-top: 48px;
+    width: 100%;
+    max-width: 400px;
+    background: var(--dark);
+    color: var(--white);
+    border: none;
+    border-radius: 14px;
+    padding: 18px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 10px;
+    transition: transform 0.08s ease, opacity .2s ease;
+  }
+  .action:active{ transform: scale(0.97); }
+  .action:disabled{ opacity: 0.55; cursor: default; }
+  .status{
+    margin-top: 14px;
+    font-size: 0.85rem;
+    color: var(--dark);
+    text-align:center;
+    min-height: 1.2em;
+    opacity: 0.85;
+  }
+  .reset-link{
+    margin-top: 28px;
+    background:none;
+    border:none;
+    color: var(--dark);
+    opacity:0.6;
+    font-size: 0.78rem;
+    text-decoration: underline;
+    cursor:pointer;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <svg class="bottle" viewBox="0 0 120 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="48" y="6" width="22" height="18" rx="3" fill="#2E5240"/>
+    <path d="M40 26 H78 C82 26 86 30 86 35 V198 C86 206 80 212 72 212 H46 C38 212 32 206 32 198 V35 C32 30 36 26 40 26 Z" fill="#2E5240"/>
+    <path d="M86 40 C92 38 98 40 100 46 C102 52 98 58 92 58" stroke="#2E5240" stroke-width="6" stroke-linecap="round" fill="none"/>
+  </svg>
+
+  <div id="dayLabel" class="label-pill">–</div>
+
+  <div id="dayRow" class="day-row"></div>
+
+  <div id="weekLabel" class="label-pill week-label">–</div>
+
+  <div id="weekRow" class="week-row"></div>
+
+  <button id="logBtn" class="action">🍶 Trinken erfasst</button>
+  <div id="status" class="status"></div>
+
+  <button id="resetBtn" class="reset-link">Heutigen Tag zurücksetzen</button>
+</div>
+
+<script>
+(function(){
+  const WEEKDAY_SHORT = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+  const WEEKDAY_FULL  = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+  const MONTHS = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+
+  const dayLabelEl = document.getElementById('dayLabel');
+  const dayRowEl   = document.getElementById('dayRow');
+  const weekLabelEl= document.getElementById('weekLabel');
+  const weekRowEl  = document.getElementById('weekRow');
+  const logBtn     = document.getElementById('logBtn');
+  const resetBtn   = document.getElementById('resetBtn');
+  const statusEl   = document.getElementById('status');
+
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function dateKey(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+
+  // Montag der aktuellen Woche ermitteln
+  function getMonday(d){
+    const date = new Date(d);
+    const day = date.getDay(); // 0 = So
+    const diff = (day === 0 ? -6 : 1) - day;
+    date.setDate(date.getDate() + diff);
+    date.setHours(0,0,0,0);
+    return date;
+  }
+
+  function weekDates(monday){
+    const arr = [];
+    for(let i=0;i<7;i++){
+      const d = new Date(monday);
+      d.setDate(monday.getDate()+i);
+      arr.push(d);
+    }
+    return arr;
+  }
+
+  const STORAGE_KEY = "hydration:state";
+
+  async function loadState(){
+    try{
+      const res = await window.storage.get(STORAGE_KEY, false);
+      if(res && res.value) return JSON.parse(res.value);
+    }catch(e){ /* kein gespeicherter Wert vorhanden */ }
+    return null;
+  }
+
+  async function saveState(state){
+    try{
+      await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+    }catch(e){
+      console.error("Speichern fehlgeschlagen", e);
+    }
+  }
+
+  let state = null; // { mondayKey: 'YYYY-MM-DD', days: { 'YYYY-MM-DD': count } }
+
+  function buildIndicatorCircles(count){
+    dayRowEl.innerHTML = "";
+    for(let i=0;i<4;i++){
+      const div = document.createElement('div');
+      div.className = "indicator" + (i < count ? " filled" : "");
+      dayRowEl.appendChild(div);
+    }
+  }
+
+  // Reihenfolge der Viertel-Füllung: oben-links, unten-links, oben-rechts, unten-rechts
+  function quadrantSVG(count){
+    const r = 19, cx = 21, cy = 21;
+    const quads = [
+      {name:"tl", path:`M${cx},${cy} L${cx},${cy-r} A${r},${r} 0 0,0 ${cx-r},${cy} Z`},
+      {name:"bl", path:`M${cx},${cy} L${cx-r},${cy} A${r},${r} 0 0,0 ${cx},${cy+r} Z`},
+      {name:"tr", path:`M${cx},${cy} L${cx+r},${cy} A${r},${r} 0 0,0 ${cx},${cy-r} Z`},
+      {name:"br", path:`M${cx},${cy} L${cx},${cy+r} A${r},${r} 0 0,0 ${cx+r},${cy} Z`}
+    ];
+    let inner = "";
+    quads.forEach((q,i)=>{
+      const fill = i < count ? "#1A2BE0" : "#ffffff";
+      inner += `<path d="${q.path}" fill="${fill}" stroke="#16241c" stroke-width="1.6" stroke-linejoin="round"/>`;
+    });
+    return `<svg viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" stroke="#16241c" stroke-width="1.8"/>
+      ${inner}
+    </svg>`;
+  }
+
+  function buildWeekRow(monday, days, todayKeyStr){
+    weekRowEl.innerHTML = "";
+    const dates = weekDates(monday);
+    dates.forEach(d=>{
+      const key = dateKey(d);
+      const count = days[key] || 0;
+      const col = document.createElement('div');
+      col.className = "week-col" + (key === todayKeyStr ? " today" : "");
+      col.innerHTML = quadrantSVG(count) + `<span>${WEEKDAY_SHORT[d.getDay()]}</span>`;
+      weekRowEl.appendChild(col);
+    });
+  }
+
+  function formatDayLabel(d){
+    return `${WEEKDAY_FULL[d.getDay()]}, ${d.getDate()}. ${MONTHS[d.getMonth()]}`;
+  }
+
+  function formatWeekLabel(monday){
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate()+6);
+    if(monday.getMonth() === sunday.getMonth()){
+      return `${monday.getDate()}.–${sunday.getDate()}. ${MONTHS[monday.getMonth()]}`;
+    }
+    return `${monday.getDate()}. ${MONTHS[monday.getMonth()]} – ${sunday.getDate()}. ${MONTHS[sunday.getMonth()]}`;
+  }
+
+  async function ensureCurrentWeek(){
+    const now = new Date();
+    const monday = getMonday(now);
+    const mondayKey = dateKey(monday);
+
+    if(!state || state.mondayKey !== mondayKey){
+      // neue Woche -> alles zurücksetzen
+      state = { mondayKey, days: {} };
+      await saveState(state);
+    }
+    return monday;
+  }
+
+  function render(monday){
+    const now = new Date();
+    const todayKey = dateKey(now);
+    const todayCount = state.days[todayKey] || 0;
+
+    dayLabelEl.textContent = formatDayLabel(now);
+    weekLabelEl.textContent = formatWeekLabel(monday);
+
+    buildIndicatorCircles(todayCount);
+    buildWeekRow(monday, state.days, todayKey);
+
+    logBtn.disabled = todayCount >= 4;
+    logBtn.textContent = todayCount >= 4 ? "✓ Tagesziel erreicht" : "🍶 Trinken erfasst";
+  }
+
+  async function logDrink(){
+    const monday = await ensureCurrentWeek();
+    const now = new Date();
+    const todayKey = dateKey(now);
+    const current = state.days[todayKey] || 0;
+    if(current >= 4) return;
+    state.days[todayKey] = current + 1;
+    await saveState(state);
+    render(monday);
+    statusEl.textContent = "Gespeichert ✓";
+    setTimeout(()=>{ statusEl.textContent = ""; }, 1500);
+  }
+
+  async function resetToday(){
+    const monday = await ensureCurrentWeek();
+    const todayKey = dateKey(new Date());
+    delete state.days[todayKey];
+    await saveState(state);
+    render(monday);
+  }
+
+  // Web NFC (sofern vom Browser unterstützt, z.B. Chrome auf Android)
+  async function setupNFC(){
+    if('NDEFReader' in window){
+      try{
+        const reader = new NDEFReader();
+        await reader.scan();
+        statusEl.textContent = "NFC bereit – Flasche antippen";
+        reader.onreading = () => { logDrink(); };
+        reader.onreadingerror = () => {
+          statusEl.textContent = "NFC-Lesefehler, bitte erneut versuchen";
+        };
+      }catch(e){
+        // Berechtigung verweigert oder nicht verfügbar -> stiller Fallback auf Button
+      }
+    }
+  }
+
+  async function init(){
+    const monday = await ensureCurrentWeek();
+    state = state || { mondayKey: dateKey(monday), days: {} };
+    render(monday);
+    setupNFC();
+  }
+
+  logBtn.addEventListener('click', logDrink);
+  resetBtn.addEventListener('click', resetToday);
+
+  (async function start(){
+    const loaded = await loadState();
+    if(loaded) state = loaded;
+    init();
+  })();
+})();
+</script>
+</body>
+</html>
